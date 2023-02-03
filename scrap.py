@@ -1,6 +1,7 @@
 import requests
 import bs4
 import time
+import csv
 
 baseUrl = 'https://stockx.com'
 uri = '/fr-fr/sneakers?page='
@@ -109,5 +110,21 @@ if response.ok:
             except:
               pass
 
-            time.sleep(1)
+            time.sleep(2)
     #print('\nL id est:', id)
+    
+rows = []
+for i in range(len(endpoints)):
+  rows.append({
+    "id": i,
+    "category": "None",
+    "link": endpoints[i]
+  })
+
+headers = ["id","category","link"]
+
+with open('endpointsList.csv', 'w', newline="") as file:
+    writer = csv.DictWriter(file, fieldnames=headers)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow(row)
