@@ -171,7 +171,7 @@ for idChaussure in idChaussures:
     print('Request failed with status code:', response2.status_code)
   else:
     datajson = response2.json()
-    print(datajson)
+    #print(datajson)
     try:
       listeTaille = datajson['data']['product']['variants']
     except TypeError:
