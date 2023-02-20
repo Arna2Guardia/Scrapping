@@ -26,6 +26,7 @@ def endpointsCollector():
     webpoints.append(baseUrl + uri + str(i))
   endpoints = []
   idChaussures = []
+  nameChaussures = []
   for webpoint in webpoints:
     response = requests.get(webpoint, headers=headers)
     if response.ok:
@@ -34,12 +35,15 @@ def endpointsCollector():
       divs = swoup.findAll('div', {"class": "css-1ibvugw-GridProductTileContainer"})
       for div in divs:
           a = div.find('a')
+          name = div.find('p', {"class": "css-3lpefb"})
+          name = name.contents[0]
+          print(name)
           endpoints.append(baseUrl + a['href'])
           id = a['href']
           id = id.replace('/fr-fr/','')
           idChaussures.append(id)
-  return endpoints, idChaussures
-
+          nameChaussures.append(name)
+  return endpoints, idChaussures, nameChaussures
 
 
 print(response) 
@@ -129,22 +133,22 @@ print(response)
 #             time.sleep(1)
 #     #print('\nL id est:', id)
     
-# rows = []
-# end, _ = endpointsCollector()
-# for i in range(len(end)):
-#   rows.append({
-#     "id": i,
-#     "category": "None",
-#     "link": end[i]
-#   })
+rows = []
+end, _, name = endpointsCollector()
+for i in range(len(end)):
+  rows.append({
+    "id": i,
+    "name": name[i],
+    "link": end[i]
+  })
 
-# headers2 = ["id","category","link"]
+headers2 = ["id","name","link"]
 
-# with open('endpointsList.csv', 'w', newline="") as file:
-#     writer = csv.DictWriter(file, fieldnames=headers2)
-#     writer.writeheader()
-#     for row in rows:
-#         writer.writerow(row)
+with open('endpointsList.csv', 'w', newline="") as file:
+    writer = csv.DictWriter(file, fieldnames=headers2)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow(row)
   
 
 
@@ -157,7 +161,7 @@ headers3 = {
     'X-Stockx-Device-Id': 'jsui_1_bot_mdr'
 }
 
-_, idChaussures = endpointsCollector()
+_, idChaussures, _ = endpointsCollector()
 #print(idChaussures)
 
 with open("data.json", "r") as file:
