@@ -27,7 +27,8 @@ datajson = response.json()
 
 #On prends uniquement les données de la réponse qui nous intéressent
 liste_taille = datajson['data']['product']['variants']
-
+allPrices = []
+demandes = []
 #On se retrouve donc avec un liste python, facilement traitable
 print(liste_taille[1])
 
@@ -42,7 +43,14 @@ for i in range(len(liste_taille)):
     else:
         prix_haut = interesting['lowestAsk']
     nb_demande = interesting['numberOfAsks']
+    allPrices.append([prix_bas,prix_haut])
+    demandes.append(nb_demande)
+
     print('Pour la taille ' + str(taille) + ' US.')
     print('Le prix max est de ' + str(prix_haut) + "$.")
     print('Et le prix le plus bas de ' + str(prix_bas) + "$.")
     print('Il y a actuellement ' + str(nb_demande) + ' demandes pour cette taille et ce modèle.\n')
+
+print(allPrices)
+print(demandes)
+

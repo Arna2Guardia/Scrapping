@@ -133,24 +133,6 @@ print(response)
 #             time.sleep(1)
 #     #print('\nL id est:', id)
     
-rows = []
-end, _, name = endpointsCollector()
-for i in range(len(end)):
-  rows.append({
-    "id": i,
-    "name": name[i],
-    "link": end[i]
-  })
-
-headers2 = ["id","name","link"]
-
-with open('endpointsList.csv', 'w', newline="") as file:
-    writer = csv.DictWriter(file, fieldnames=headers2)
-    writer.writeheader()
-    for row in rows:
-        writer.writerow(row)
-  
-
 
 headers3 = {
     'Apollographql-Client-Name': 'Iron',
@@ -165,7 +147,11 @@ _, idChaussures, _ = endpointsCollector()
 #print(idChaussures)
 
 with open("data.json", "r") as file:
-    data = json.load(file)
+  data = json.load(file)
+
+
+allInfo = []
+
 
 for idChaussure in idChaussures:
   data['variables']['id'] = idChaussure
@@ -183,6 +169,7 @@ for idChaussure in idChaussures:
       pass
 
     for i in range(len(listeTaille)):
+
       element = listeTaille[i]
       interesting = element['market']['bidAskData']
       prixBas = interesting['highestBid']
@@ -192,8 +179,34 @@ for idChaussure in idChaussures:
       else:
           prixHaut = interesting['lowestAsk']
       nbDemande = interesting['numberOfAsks']
+      allInfo.append([prixBas,prixHaut,])
+
       print('Pour la taille ' + str(taille) + ' US.')
       print('Le prix max est de ' + str(prixHaut) + "$.")
       print('Et le prix le plus bas de ' + str(prixBas) + "$.")
       print('Il y a actuellement ' + str(nbDemande) + ' demandes pour cette taille et ce modèle.\n')
       time.sleep(1)
+
+
+rows = []
+end, _, name = endpointsCollector()
+for i in range(len(end)):
+  rows.append({
+    "id": i,
+    "name": name[i],
+    "link": end[i]
+    #"3.5": allPrices[i]
+  })
+
+headers2 = ["id","name","link","3.5","4","4.5","5","5,5","6",
+            "6.5","7","7.5","8","8.5","9","9.5","10","10.5",
+            "11","11.5","12","12.5","13","13.5","14","14.5",
+            "15","15.5","16","16.5","17","17.5","18","18.5",
+            "19","19.5","20"]
+
+
+with open('endpointsList.csv', 'w', newline="") as file:
+    writer = csv.DictWriter(file, fieldnames=headers2)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow(row)

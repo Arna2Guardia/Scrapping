@@ -59,6 +59,8 @@ _, idChaussures = endpointsCollector()
 with open("data.json", "r") as file:
     data = json.load(file)
 
+
+allPrices = []
 for idChaussure in idChaussures:
   data['variables']['id'] = idChaussure
 
