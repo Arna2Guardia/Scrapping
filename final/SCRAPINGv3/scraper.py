@@ -3,23 +3,41 @@ import bs4
 import time
 import csv
 import json
+import random
 
 
 baseUrl = 'https://stockx.com'
 uri = '/fr-fr/sneakers?page='
 
+# headers = {
+#     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36",
+#     "Accept-Encoding": "gzip, deflate",
+#     "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+#     "Accept": "application/json",
+#     "Referer": "https://stockx.com/",
+#     "Origin": "https://stockx.com",
+#     "Connection": "keep-alive",
+#     "sec-fetch-site": "none",
+#     "sec-fetch-mode": "navigate",
+#     "Cache-Control": "no-cache",
+#     "Pragma": "no-cache",  
+#     "Sec-Fetch-Dest": "document"
+#     }
+
 headers = {
-    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/12.0",
-    "Accept-Encoding": "gzip, deflate",
-    "Accept-Language": "en-US,en;q=0.8",
-    "Accept": "text/html",
-    "Referer": "https://stockx.com/",
-    "Origin": "https://stockx.com",
-    "Connection": "keep-alive",
-    "Cache-Control": "no-cache"
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Referer': 'https://stockx.com/',
+    'Origin': 'https://stockx.com'
 }
 
-response = requests.get(baseUrl + uri, headers=headers)
+
+http_proxies = {
+    "HTTPS": "https://104.223.135.178:10000"
+}
+
+response = requests.get(baseUrl + uri, headers=headers,proxies=http_proxies)
 
 def endpointsCollector():
   webpoints = []
@@ -127,6 +145,45 @@ headers3 = {
     'X-Stockx-Device-Id': 'jsui_1_bot_mdr'
 }
 
+
+
+headers4 = {
+    'Apollographql-Client-Name': 'Venus',
+    'App-Version': '2023.02.01.01',
+    'App-Platform': 'iOS',
+    'Accept-Language': 'de-DE',
+    'User-Agent': 'myUserAgent4/0',
+    'X-Stockx-Device-Id': 'jsui_1_bot_fef'
+}
+
+headers5 = {
+    'Apollographql-Client-Name': 'Mars',
+    'App-Version': '2023.02.02.00',
+    'App-Platform': 'Windows',
+    'Accept-Language': 'es-ES',
+    'User-Agent': 'myUserAgent5/0',
+    'X-Stockx-Device-Id': 'jsui_1_bot_lol'
+}
+
+headers6 = {
+    'Apollographql-Client-Name': 'Mercury',
+    'App-Version': '2023.02.01.00',
+    'App-Platform': 'Android',
+    'Accept-Language': 'en-US',
+    'User-Agent': 'myUserAgent3/0',
+    'X-Stockx-Device-Id': 'jsui_1_bot_jdh'
+}
+
+proxies = [
+    {"SOCKS5":"socks5://157.245.223.201:59166"},
+    {"SOCKS5":"socks5://159.89.49.172:59166"},
+    {"SOCKS5": "socks5://142.44.241.192:59166"}
+]
+
+headers_list = [headers3, headers4, headers5, headers6]
+random_headers = random.choice(headers_list)
+random_proxy = random.choice(proxies)
+
 _, idChaussures, _ = endpointsCollector()
 #print(idChaussures)
 
@@ -139,12 +196,21 @@ cpt = 0
 
 # boucle sur chaque chaussure
 for idChaussure in idChaussures:
-
+  print("On en est à la paire n°",cpt)
   data['variables']['id'] = idChaussure
 
-  response2 = requests.post("https://stockx.com/api/p/e", json=data, headers=headers3)
+  response2 = requests.post("https://stockx.com/api/p/e", json=data, headers=random_headers, proxies=random_proxy)
   if response2.status_code != 200:
     print('Request failed with status code:', response2.status_code)
+    time.sleep(1650)
+    response2 = requests.post("https://stockx.com/api/p/e", json=data, headers=random_headers, proxies=random_proxy)
+    datajson = response2.json()
+    #print(datajson)
+    try:
+      listeTaille = datajson['data']['product']['variants']
+    except TypeError:
+      print(f"Error processing idChaussure: {idChaussure}")
+      pass
   else:
     datajson = response2.json()
     #print(datajson)
@@ -162,6 +228,10 @@ for idChaussure in idChaussures:
       interesting = element['market']['bidAskData']
       prixBas = interesting['highestBid']
       taille = interesting['highestBidSize']
+      if str(taille)[-1] == 'Y':
+        taille = str(taille)[0:len(taille) - 1]
+      if str(taille)[-1] == 'W':
+        taille = str(taille)[0:len(taille) - 1]
       if interesting['lowestAsk'] == 'None':
           prixHaut = prixBas
       else:
@@ -173,28 +243,34 @@ for idChaussure in idChaussures:
       # print('Le prix max est de ' + str(prixHaut) + "$.")
       # print('Et le prix le plus bas de ' + str(prixBas) + "$.")
       # print('Il y a actuellement ' + str(nbDemande) + ' demandes pour cette taille et ce modèle.\n')
-      time.sleep(0.8)
+      time.sleep(2.5)
       print("Tout va bien")
     allInfo.append(obj)
     cpt+=1
-    print(cpt)
-    if cpt == 20:
-      break
-    print("petite pause")
-    time.sleep(20)
-  
+    print("On en est à la paire n°",cpt)
+    if cpt == 0%3:
+      print("petite pause")
+      time.sleep(100)
+    # if cpt == 100:
+    #    break
+    
 
 rows = []
 end, _, name = endpointsCollector()
-for i in range(len(allInfo)):
+for i in range(cpt):
   rowsBuilder = {}
   rowsBuilder["id"] = i
   rowsBuilder["name"] = name[i]
   rowsBuilder["link"] = end[i]
   for key, value in allInfo[i].items():
-    rowsBuilder[key] = value
+    try:
+     rowsBuilder[key] = value 
+    except:
+        pass
+  
 
   rows.append(rowsBuilder)
+
 
 headers2 = ["id","name","link","1","1.5","2","2.5","3","3.5","4","4.5","5","5.5","6",
             "6.5","7","7.5","8","8.5","9","9.5","10","10.5",
@@ -218,6 +294,9 @@ with open("all_data.csv", 'w', newline="") as file:
     writer = csv.DictWriter(file, fieldnames=headers2)
     writer.writeheader()
     for row in rows:
-        writer.writerow(row)
+        try:
+          writer.writerow(row)
+        except:
+            pass
 
 print('Done')
